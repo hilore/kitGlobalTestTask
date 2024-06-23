@@ -55,7 +55,7 @@ export class TaskService {
   }
 
   async deleteTask(id: string): Promise<object> {
-    await this.model.deleteOne({_id: id})
+    await this.model.findByIdAndDelete(id);
     return {};
   }
 }
