@@ -5,6 +5,7 @@ import {
   Delete,
   Param,
   Body,
+  BadRequestException,
   NotFoundException,
   ConflictException,
   InternalServerErrorException,
@@ -48,8 +49,13 @@ export class TaskController {
     }
   }
 
+  @UsePipes(new ValidationPipe())
   @Delete()
   async deleteTask(@Body() dto: DeleteTaskDto) {
+    if ("id" in dto && Object.keys(dto).length > 1) {
+      throw new BadRequestException("Only ID must be specified");
+    }
+
     try {
       const res = await this.taskService.deleteTask(dto.id);
       return res;
