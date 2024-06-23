@@ -11,6 +11,9 @@ export class Task {
   @Prop({required: true})
   description: string;
 
+  @Prop({type: String, ref: "Status"})
+  status: string
+
   @Prop({ type: Date, default: Date.now() })
   createdAt: Date;
 }
