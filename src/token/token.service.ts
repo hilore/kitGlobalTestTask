@@ -1,9 +1,9 @@
-import * as jwt from "jsonwebtoken";
+import * as jwt from 'jsonwebtoken';
 import { Injectable } from '@nestjs/common';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { Token } from './schemas/token.schema';
-import TokenDto from "./dto/token.dto";
+import TokenDto from './dto/token.dto';
 
 type Tokens = {
   accessToken: string;

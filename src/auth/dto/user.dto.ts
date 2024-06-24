@@ -1,4 +1,4 @@
-import {UserDocument} from "../schemas/user.schema";
+import { UserDocument } from '../schemas/user.schema';
 
 type Tokens = {
   accessToken: string;
@@ -23,6 +23,4 @@ class UserTokenDto {
   }
 }
 
-export {
-  UserTokenDto
-};
+export { UserTokenDto };
