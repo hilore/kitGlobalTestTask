@@ -27,6 +27,6 @@ import { ProjectModule } from './project/project.module';
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(JWTMiddleware).forRoutes("tasks");
+    consumer.apply(JWTMiddleware).forRoutes("tasks", "projects", "sign-out");
   }
 }
