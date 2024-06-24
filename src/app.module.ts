@@ -7,6 +7,7 @@ import { TaskModule } from './task/task.module';
 import { AuthModule } from './auth/auth.module';
 import { TokenModule } from './token/token.module';
 import {JWTMiddleware} from "./middlewares/jwt.middleware";
+import { ProjectModule } from './project/project.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import {JWTMiddleware} from "./middlewares/jwt.middleware";
     TaskModule,
     AuthModule,
     TokenModule,
+    ProjectModule,
   ],
   controllers: [AppController],
   providers: [AppService],
