@@ -5,6 +5,7 @@ import {
   Body,
   Req,
   Res,
+  HttpCode,
   ConflictException,
   UsePipes,
   ValidationPipe,
@@ -17,6 +18,7 @@ import {AuthService} from "./auth.service";
 import {CreateUserDto} from "./dto/createUser.dto";
 import {LoginUserDto} from "./dto/loginUser.dto";
 import {Request, Response} from "express";
+import { ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 
 @Controller("")
 export class AuthController {
@@ -28,6 +30,9 @@ export class AuthController {
 
   @UsePipes(new ValidationPipe())
   @Post("sign-up")
+  @ApiOperation({summary: "Register a new user"})
+  @ApiResponse({status: 201, description: "The user has been successfully registered"})
+  @ApiResponse({status: 409, description: "Conflict"})
   async signUp(@Body() dto: CreateUserDto, @Res() res: Response) {
     try {
       const {name, email, password} = dto;
@@ -42,6 +47,11 @@ export class AuthController {
 
   @UsePipes(new ValidationPipe())
   @Post("sign-in")
+  @HttpCode(200)
+  @ApiOperation({summary: "User login"})
+  @ApiResponse({status: 200, description: "The user has been successfully logged in"})
+  @ApiResponse({status: 400, description: "Bad Request"})
+  @ApiResponse({status: 404, description: "User not found"})
   async signIn(@Body() dto: LoginUserDto, @Res() res: Response) {
     try {
       const {email, password} = dto;
@@ -65,7 +75,12 @@ export class AuthController {
     }
   }
 
+  @ApiBearerAuth()
   @Post("sign-out")
+  @HttpCode(200)
+  @ApiOperation({summary: "User logout"})
+  @ApiResponse({status: 200, description: "The user has been successfully logged out"})
+  @ApiResponse({status: 500, description: "Internal Server Error"})
   async signOut(@Req() req: Request, @Res() res: Response) {
     try {
       const token = this.authService.getTokenFromHeaders(req.headers.cookie);
@@ -80,7 +95,12 @@ export class AuthController {
     }
   }
 
+  @ApiBearerAuth()
   @Get("refresh-token")
+  @ApiOperation({summary: "Refresh token"})
+  @ApiResponse({status: 200, description: "The token has been successfully refreshed"})
+  @ApiResponse({status: 401, description: "Unaiuthorized"})
+  @ApiResponse({status: 500, description: "Internal Server Error"})
   async refresh(@Req() req: Request, @Res() res: Response) {
     try {
       const token = this.authService.getTokenFromHeaders(req.headers.cookie);
