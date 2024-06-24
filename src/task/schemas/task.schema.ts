@@ -14,6 +14,9 @@ export class Task {
   @Prop({type: String, ref: "Status"})
   status: string
 
+  @Prop({type: String, ref: "User"})
+  user: string
+
   @Prop({ type: Date, default: Date.now() })
   createdAt: Date;
 }

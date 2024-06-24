@@ -12,14 +12,14 @@ export class TaskService {
     @InjectModel(Status.name) private statusModel: Model<Status>
   ) {}
 
-  async createTask(title: string, description: string): Promise<TaskDto> {
+  async createTask(userId: string, title: string, description: string): Promise<TaskDto> {
     const candidate = await this.findByTitle(title);
     if (candidate) {
       throw new Error("Task with such title already exists");
     }
 
     const status = await this.statusModel.findOne({title: "OPEN"});
-    const task = new this.model({title, description, status: status.title});
+    const task = new this.model({title, description, status: status.title, user: userId});
     await task.save();
 
     return new TaskDto(task);
@@ -34,6 +34,25 @@ export class TaskService {
     });
 
     return tasksDto;
+  }
+
+  async updateTask(id: string, title?: string, description?: string): Promise<TaskDto> {
+    const task = await this.model.findById(id);
+    if (!task) {
+      throw new Error(`Task created by user with ${id} ID does not exists`);
+    }
+
+    if (title !== undefined) {
+      task.title = title;
+    }
+
+    if (description !== undefined) {
+      task.description = description;
+    }
+
+    await task.save();
+
+    return new TaskDto(task);
   }
 
   async findByTitle(title: string): Promise<TaskDto> {
