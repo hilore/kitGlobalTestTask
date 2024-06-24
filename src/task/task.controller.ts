@@ -2,6 +2,7 @@ import {
   Controller,
   Get,
   Post,
+  Put,
   Delete,
   Param,
   Body,
@@ -16,6 +17,7 @@ import {
 import {TaskService} from "./task.service";
 import {CreateTaskDto} from "./dto/create.dto";
 import {DeleteTaskDto} from "./dto/delete.dto";
+import {UpdateTaskDto} from "./dto/update.dto";
 import {Request} from "express";
 
 interface UserRequest extends Request {
@@ -52,6 +54,33 @@ export class TaskController {
       return task;
     } catch (err) {
       throw new ConflictException(err.message);
+    }
+  }
+
+  @UsePipes(new ValidationPipe())
+  @Put(":id")
+  async updateTask(@Param("id") id: string, @Body() dto: UpdateTaskDto) {
+    if (id.length != 24) {
+      throw new BadRequestException("Task ID must be exactly 24 characters long");
+    }
+
+    try {
+      const {title, description} = dto;
+      if (title === undefined && description === undefined) {
+        const task = await this.taskService.findById(id);
+        return task;
+      }
+
+      const task = await this.taskService.updateTask(id, title, description);
+
+      return task;
+    } catch (err) {
+      if (err instanceof Error) {
+        throw new NotFoundException(err.message);
+      }
+
+      console.error(`Failed to update task with ID ${id}:`, err);
+      throw new InternalServerErrorException();
     }
   }
 
