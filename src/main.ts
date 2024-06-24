@@ -10,7 +10,6 @@ async function bootstrap() {
     .setTitle("KGlobal Test Task")
     .setDescription("The project/task API description")
     .setVersion("1.0")
-    .addTag("tasks")
     .addBearerAuth()
     .build();
 

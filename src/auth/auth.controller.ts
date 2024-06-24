@@ -18,8 +18,9 @@ import {AuthService} from "./auth.service";
 import {CreateUserDto} from "./dto/createUser.dto";
 import {LoginUserDto} from "./dto/loginUser.dto";
 import {Request, Response} from "express";
-import { ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 
+@ApiTags("auth")
 @Controller("")
 export class AuthController {
   private maxAgeValue: number;

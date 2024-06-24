@@ -17,12 +17,13 @@ import {ProjectService} from "./project.service";
 import {Request} from "express";
 import {CreateProjectDto} from "./dto/createProject.dto";
 import {UpdateProjectDto} from "./dto/updateProject.dto";
-import { ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 
 interface UserRequest extends Request {
   userId: string;
 };
 
+@ApiTags("projects")
 @Controller('projects')
 export class ProjectController {
   constructor(private readonly projectService: ProjectService) {}
