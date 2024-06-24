@@ -36,7 +36,7 @@ export class TaskService {
     return tasksDto;
   }
 
-  async updateTask(id: string, title?: string, description?: string): Promise<TaskDto> {
+  async updateTask(id: string, title?: string, description?: string, status?: string): Promise<TaskDto> {
     const task = await this.model.findById(id);
     if (!task) {
       throw new Error(`Task created by user with ${id} ID does not exists`);
@@ -48,6 +48,15 @@ export class TaskService {
 
     if (description !== undefined) {
       task.description = description;
+    }
+
+    if (status !== undefined) {
+      const statusData = await this.statusModel.findOne({title: status.toUpperCase()});
+      if (!statusData) {
+        throw new Error(`Status with title ${status} does not exists`);
+      }
+
+      task.status = status;
     }
 
     await task.save();

@@ -65,13 +65,13 @@ export class TaskController {
     }
 
     try {
-      const {title, description} = dto;
-      if (title === undefined && description === undefined) {
+      const {title, description, status} = dto;
+      if (title === undefined && description === undefined && status === undefined) {
         const task = await this.taskService.findById(id);
         return task;
       }
 
-      const task = await this.taskService.updateTask(id, title, description);
+      const task = await this.taskService.updateTask(id, title, description, status);
 
       return task;
     } catch (err) {

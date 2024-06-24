@@ -10,4 +10,9 @@ export class UpdateTaskDto {
   @IsString()
   @Length(10, 400)
   description?: string;
+
+  @IsOptional()
+  @IsString()
+  @Length(4, 11)
+  status?: string;
 };
