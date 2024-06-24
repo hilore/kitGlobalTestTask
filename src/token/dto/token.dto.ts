@@ -1,4 +1,4 @@
-import {TokenDocument} from "../schemas/token.schema";
+import { TokenDocument } from '../schemas/token.schema';
 
 class TokenDto {
   id: string;

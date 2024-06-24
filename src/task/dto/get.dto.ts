@@ -1,4 +1,4 @@
-import {TaskDocument} from "../schemas/task.schema";
+import { TaskDocument } from '../schemas/task.schema';
 
 class TaskDto {
   id: string;

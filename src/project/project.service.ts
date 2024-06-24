@@ -1,24 +1,24 @@
 import { Injectable } from '@nestjs/common';
-import {Model} from "mongoose";
-import {InjectModel} from "@nestjs/mongoose";
-import {Project} from "./schemas/project.schema";
-import {TaskService} from "../task/task.service";
-import ProjectDto from "./dto/project.dto";
+import { Model } from 'mongoose';
+import { InjectModel } from '@nestjs/mongoose';
+import { Project } from './schemas/project.schema';
+import { TaskService } from '../task/task.service';
+import ProjectDto from './dto/project.dto';
 
 @Injectable()
 export class ProjectService {
   constructor(
     @InjectModel(Project.name) private projectModel: Model<Project>,
-    private readonly taskService: TaskService
+    private readonly taskService: TaskService,
   ) {}
 
   async createProject(name: string, userId: string): Promise<ProjectDto> {
-    const candidate = await this.projectModel.findOne({name});
+    const candidate = await this.projectModel.findOne({ name });
     if (candidate) {
       throw new Error(`Project with such name already exists`);
     }
 
-    const project = new this.projectModel({name, user: userId});
+    const project = new this.projectModel({ name, user: userId });
     await project.save();
 
     return new ProjectDto(project);
@@ -37,12 +37,12 @@ export class ProjectService {
   async addTask(id: string, taskId: string): Promise<ProjectDto> {
     const project = await this.projectModel.findById(id);
     if (!project) {
-      throw new Error("Project with such ID does not exists");
+      throw new Error('Project with such ID does not exists');
     }
 
     const task = await this.taskService.findById(taskId);
     if (!task) {
-      throw new Error("Task with such ID does not exists");
+      throw new Error('Task with such ID does not exists');
     }
 
     if (!project.tasks.includes(task.id)) {

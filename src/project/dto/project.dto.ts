@@ -1,4 +1,4 @@
-import {ProjectDocument} from "../schemas/project.schema";
+import { ProjectDocument } from '../schemas/project.schema';
 
 class ProjectDto {
   id: string;

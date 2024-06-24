@@ -8,13 +8,13 @@ export class Task {
   @Prop({ required: true, unique: true })
   title: string;
 
-  @Prop({required: true})
+  @Prop({ required: true })
   description: string;
 
-  @Prop({type: String, ref: "Status"})
+  @Prop({ type: String, ref: 'Status' })
   status: string;
 
-  @Prop({type: String, ref: "User"})
+  @Prop({ type: String, ref: 'User' })
   user: string;
 
   @Prop({ type: Date, default: Date.now() })
