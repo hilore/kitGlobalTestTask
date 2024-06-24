@@ -56,7 +56,7 @@ export class TaskService {
         throw new Error(`Status with title ${status} does not exists`);
       }
 
-      task.status = status;
+      task.status = statusData.title;
     }
 
     await task.save();
