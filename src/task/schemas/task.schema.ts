@@ -12,10 +12,10 @@ export class Task {
   description: string;
 
   @Prop({type: String, ref: "Status"})
-  status: string
+  status: string;
 
   @Prop({type: String, ref: "User"})
-  user: string
+  user: string;
 
   @Prop({ type: Date, default: Date.now() })
   createdAt: Date;
