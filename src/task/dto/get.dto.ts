@@ -5,6 +5,7 @@ class TaskDto {
   title: string;
   description: string;
   status: string;
+  userId: string;
   createdAt: number;
 
   constructor(task: TaskDocument) {
@@ -12,6 +13,7 @@ class TaskDto {
     this.title = task.title;
     this.description = task.description;
     this.status = task.status;
+    this.userId = task.user;
     this.createdAt = new Date(task.createdAt).getTime();
   }
 }
