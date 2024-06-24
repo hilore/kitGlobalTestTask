@@ -5,6 +5,7 @@ import {
   Delete,
   Param,
   Body,
+  Req,
   BadRequestException,
   NotFoundException,
   ConflictException,
@@ -15,6 +16,11 @@ import {
 import {TaskService} from "./task.service";
 import {CreateTaskDto} from "./dto/create.dto";
 import {DeleteTaskDto} from "./dto/delete.dto";
+import {Request} from "express";
+
+interface UserRequest extends Request {
+  userId: string;
+}
 
 @Controller('tasks')
 export class TaskController {
@@ -38,10 +44,10 @@ export class TaskController {
 
   @UsePipes(new ValidationPipe())
   @Post()
-  async createTask(@Body() dto: CreateTaskDto) {
+  async createTask(@Body() dto: CreateTaskDto, @Req() req: UserRequest) {
     try {
       const {title, description} = dto;
-      const task = await this.taskService.createTask(title, description);
+      const task = await this.taskService.createTask(req.userId, title, description);
 
       return task;
     } catch (err) {
