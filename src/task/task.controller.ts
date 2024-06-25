@@ -7,17 +7,17 @@ import {
   Param,
   Body,
   Req,
-  BadRequestException,
-  NotFoundException,
-  ConflictException,
-  InternalServerErrorException,
+  UseGuards,
+  UseFilters,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
+import {AuthGuard} from "../auth/auth.guard";
 import { TaskService } from './task.service';
 import { CreateTaskDto } from './dto/create.dto';
 import { UpdateTaskDto } from './dto/update.dto';
 import { Request } from 'express';
+import {AllExceptionsFilter} from "../exceptions/AllExceptionsFilter";
 import {
   ApiTags,
   ApiOperation,
@@ -30,6 +30,8 @@ interface UserRequest extends Request {
 }
 
 @ApiTags('tasks')
+@UseGuards(AuthGuard)
+@UseFilters(AllExceptionsFilter)
 @Controller('tasks')
 export class TaskController {
   constructor(private readonly taskService: TaskService) {}
@@ -43,13 +45,8 @@ export class TaskController {
   })
   @ApiResponse({ status: 500, description: 'Internal Server Error' })
   async getTasks() {
-    try {
-      const tasks = await this.taskService.getAllTasks();
-      return tasks;
-    } catch (err) {
-      console.error('Failed to retrieve tasks:', err);
-      throw new InternalServerErrorException();
-    }
+    const tasks = await this.taskService.getAllTasks();
+    return tasks;
   }
 
   @ApiBearerAuth()
@@ -62,10 +59,6 @@ export class TaskController {
   @ApiResponse({ status: 404, description: 'The task not found' })
   async getTask(@Param('id') id: string) {
     const task = await this.taskService.findById(id);
-    if (!task) {
-      throw new NotFoundException('Task with such title does not exists');
-    }
-
     return task;
   }
 
@@ -80,23 +73,14 @@ export class TaskController {
   @ApiResponse({ status: 409, description: 'The task already exists' })
   @ApiResponse({ status: 500, description: 'Internal Server Error' })
   async createTask(@Body() dto: CreateTaskDto, @Req() req: UserRequest) {
-    try {
-      const { title, description } = dto;
-      const task = await this.taskService.createTask(
-        req.userId,
-        title,
-        description,
-      );
+    const { title, description } = dto;
+    const task = await this.taskService.createTask(
+      req.userId,
+      title,
+      description,
+    );
 
-      return task;
-    } catch (err) {
-      if (err instanceof Error) {
-        throw new ConflictException(err.message);
-      }
-
-      console.error('Failed to create task:', err);
-      throw new InternalServerErrorException();
-    }
+    return task;
   }
 
   @ApiBearerAuth()
@@ -111,39 +95,24 @@ export class TaskController {
   @ApiResponse({ status: 404, description: 'The task not found' })
   @ApiResponse({ status: 500, description: 'Internal Server Error' })
   async updateTask(@Param('id') id: string, @Body() dto: UpdateTaskDto) {
-    if (id.length != 24) {
-      throw new BadRequestException(
-        'Task ID must be exactly 24 characters long',
-      );
-    }
-
-    try {
-      const { title, description, status } = dto;
-      if (
-        title === undefined &&
-        description === undefined &&
-        status === undefined
-      ) {
-        const task = await this.taskService.findById(id);
-        return task;
-      }
-
-      const task = await this.taskService.updateTask(
-        id,
-        title,
-        description,
-        status,
-      );
-
+    const { title, description, status } = dto;
+    if (
+      title === undefined &&
+      description === undefined &&
+      status === undefined
+    ) {
+      const task = await this.taskService.findById(id);
       return task;
-    } catch (err) {
-      if (err instanceof Error) {
-        throw new NotFoundException(err.message);
-      }
-
-      console.error(`Failed to update task with ID ${id}:`, err);
-      throw new InternalServerErrorException();
     }
+
+    const task = await this.taskService.updateTask(
+      id,
+      title,
+      description,
+      status,
+    );
+    
+    return task;
   }
 
   @ApiBearerAuth()
@@ -157,16 +126,7 @@ export class TaskController {
   @ApiResponse({ status: 400, description: 'Bad Request' })
   @ApiResponse({ status: 500, description: 'Internal Server Error' })
   async deleteTask(@Param('id') id: string) {
-    if (id.length != 24) {
-      throw new BadRequestException('ID must be exactly 24 characters long');
-    }
-
-    try {
-      const res = await this.taskService.deleteTask(id);
-      return res;
-    } catch (err) {
-      console.error(`Failed to delete task by ${id} ID:`, err);
-      throw new InternalServerErrorException();
-    }
+    const res = await this.taskService.deleteTask(id);
+    return res;
   }
 }

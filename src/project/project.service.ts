@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  ConflictException,
+  NotFoundException
+} from '@nestjs/common';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { Project } from './schemas/project.schema';
@@ -15,7 +19,7 @@ export class ProjectService {
   async createProject(name: string, userId: string): Promise<ProjectDto> {
     const candidate = await this.projectModel.findOne({ name });
     if (candidate) {
-      throw new Error(`Project with such name already exists`);
+      throw new ConflictException(`Project with such name already exists`);
     }
 
     const project = new this.projectModel({ name, user: userId });
@@ -37,12 +41,12 @@ export class ProjectService {
   async addTask(id: string, taskId: string): Promise<ProjectDto> {
     const project = await this.projectModel.findById(id);
     if (!project) {
-      throw new Error('Project with such ID does not exists');
+      throw new NotFoundException('Project with such ID does not exists');
     }
 
     const task = await this.taskService.findById(taskId);
     if (!task) {
-      throw new Error('Task with such ID does not exists');
+      throw new NotFoundException('Task with such ID does not exists');
     }
 
     if (!project.tasks.includes(task.id)) {

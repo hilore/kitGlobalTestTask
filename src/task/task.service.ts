@@ -1,15 +1,23 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  ConflictException,
+  NotFoundException
+} from '@nestjs/common';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { Task } from './schemas/task.schema';
-import { Status } from './schemas/status.schema';
 import TaskDto from './dto/get.dto';
+
+enum Status {
+  Open = "OPEN",
+  InProgress = "IN PROGRESS",
+  Resolved = "RESOLVED"
+};
 
 @Injectable()
 export class TaskService {
   constructor(
     @InjectModel(Task.name) private model: Model<Task>,
-    @InjectModel(Status.name) private statusModel: Model<Status>,
   ) {}
 
   async createTask(
@@ -19,14 +27,13 @@ export class TaskService {
   ): Promise<TaskDto> {
     const candidate = await this.findByTitle(title);
     if (candidate) {
-      throw new Error('Task with such title already exists');
+      throw new ConflictException('Task with such title already exists');
     }
 
-    const status = await this.statusModel.findOne({ title: 'OPEN' });
     const task = new this.model({
       title,
       description,
-      status: status.title,
+      status: Status.Open,
       user: userId,
     });
     await task.save();
@@ -53,7 +60,7 @@ export class TaskService {
   ): Promise<TaskDto> {
     const task = await this.model.findById(id);
     if (!task) {
-      throw new Error(`Task created by user with ${id} ID does not exists`);
+      throw new NotFoundException(`Task such ID does not exists`);
     }
 
     if (title !== undefined) {
@@ -65,14 +72,12 @@ export class TaskService {
     }
 
     if (status !== undefined) {
-      const statusData = await this.statusModel.findOne({
-        title: status.toUpperCase(),
-      });
-      if (!statusData) {
-        throw new Error(`Status with title ${status} does not exists`);
+      const newTaskStatus = Object.values(Status).find(s => s === status.toUpperCase());
+      if (newTaskStatus === undefined) {
+        throw new NotFoundException(`Status with title ${status} does not exists`);
       }
 
-      task.status = statusData.title;
+      task.status = newTaskStatus;
     }
 
     await task.save();
@@ -92,7 +97,7 @@ export class TaskService {
   async findById(id: string): Promise<TaskDto> {
     const task = await this.model.findById(id).exec();
     if (!task) {
-      return null;
+      throw new NotFoundException("Task with such ID does not exists");
     }
 
     return new TaskDto(task);

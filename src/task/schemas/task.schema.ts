@@ -11,7 +11,7 @@ export class Task {
   @Prop({ required: true })
   description: string;
 
-  @Prop({ type: String, ref: 'Status' })
+  @Prop({ default: 'OPEN' })
   status: string;
 
   @Prop({ type: String, ref: 'User' })

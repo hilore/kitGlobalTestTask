@@ -6,17 +6,17 @@ import {
   Req,
   Param,
   Body,
+  UseGuards,
+  UseFilters,
   UsePipes,
   ValidationPipe,
-  BadRequestException,
-  ConflictException,
-  NotFoundException,
-  InternalServerErrorException,
 } from '@nestjs/common';
+import {AuthGuard} from "../auth/auth.guard";
 import { ProjectService } from './project.service';
 import { Request } from 'express';
 import { CreateProjectDto } from './dto/createProject.dto';
 import { UpdateProjectDto } from './dto/updateProject.dto';
+import {AllExceptionsFilter} from "../exceptions/AllExceptionsFilter";
 import {
   ApiTags,
   ApiOperation,
@@ -29,6 +29,8 @@ interface UserRequest extends Request {
 }
 
 @ApiTags('projects')
+@UseGuards(AuthGuard)
+@UseFilters(AllExceptionsFilter)
 @Controller('projects')
 export class ProjectController {
   constructor(private readonly projectService: ProjectService) {}
@@ -42,13 +44,8 @@ export class ProjectController {
   })
   @ApiResponse({ status: 500, description: 'Internal Server Error' })
   async getProjects() {
-    try {
-      const projects = await this.projectService.getAllProjects();
-      return projects;
-    } catch (err) {
-      console.error(`Failed to retrieve projects:`, err);
-      throw new InternalServerErrorException();
-    }
+    const projects = await this.projectService.getAllProjects();
+    return projects;
   }
 
   @ApiBearerAuth()
@@ -62,20 +59,12 @@ export class ProjectController {
   @ApiResponse({ status: 409, description: 'The project already exists' })
   @ApiResponse({ status: 500, description: 'Internal Server Error' })
   async createProject(@Body() dto: CreateProjectDto, @Req() req: UserRequest) {
-    try {
-      const project = await this.projectService.createProject(
-        dto.name,
-        req.userId,
-      );
-      return project;
-    } catch (err) {
-      if (err instanceof Error) {
-        throw new ConflictException(err.message);
-      }
+    const project = await this.projectService.createProject(
+      dto.name,
+      req.userId,
+    );
 
-      console.error('Failed to create project:', err);
-      throw new InternalServerErrorException();
-    }
+    return project;
   }
 
   @ApiBearerAuth()
@@ -85,29 +74,14 @@ export class ProjectController {
     status: 200,
     description: 'The task has been successfully added to a project',
   })
-  @ApiResponse({ status: 400, description: 'Bad Request' })
   @ApiResponse({ status: 404, description: 'The task not found' })
   @ApiResponse({ status: 500, description: 'Internal Server Error' })
   async updateProject(@Param('id') id: string, @Body() dto: UpdateProjectDto) {
-    if (id.length != 24) {
-      throw new BadRequestException(
-        'Project ID must be exactly 24 characters long',
-      );
-    }
+    const project = await this.projectService.addTask(
+      id,
+      dto.taskId
+    );
 
-    try {
-      const project = await this.projectService.addTask(id, dto.taskId);
-      return project;
-    } catch (err) {
-      if (err instanceof Error) {
-        throw new NotFoundException(err.message);
-      }
-
-      console.error(
-        `Failed to add task ${dto.taskId} to a project ${id}:`,
-        err,
-      );
-      throw new InternalServerErrorException();
-    }
+    return project;
   }
 }
