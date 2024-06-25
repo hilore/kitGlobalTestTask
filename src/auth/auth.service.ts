@@ -1,4 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  UnauthorizedException,
+  NotFoundException,
+  ConflictException
+} from '@nestjs/common';
 import { TokenService } from '../token/token.service';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
@@ -20,7 +26,7 @@ export class AuthService {
   ): Promise<UserTokenDto> {
     const candidate = await this.userModel.findOne({ email });
     if (candidate) {
-      throw new Error('User with such email already exists');
+      throw new ConflictException('User with such email already exists');
     }
 
     const hashedPassword = await bcrypt.hash(password, 4);
@@ -36,12 +42,12 @@ export class AuthService {
   async login(email: string, password: string): Promise<UserTokenDto> {
     const user = await this.userModel.findOne({ email });
     if (!user) {
-      throw new Error('404:User with such email does not exists');
+      throw new NotFoundException('User with such email does not exists');
     }
 
     const isPwdValid = await bcrypt.compare(password, user.password);
     if (!isPwdValid) {
-      throw new Error('400:Incorrect password');
+      throw new BadRequestException('Incorrect password');
     }
 
     const tokens = this.tokenService.generateTokens({ id: user.id });
@@ -57,13 +63,13 @@ export class AuthService {
 
   async refresh(refreshToken: string) {
     if (!refreshToken) {
-      throw new Error('Unauthorized');
+      throw new UnauthorizedException();
     }
 
     const userData = this.tokenService.validateRefreshToken(refreshToken);
     const tokenFromDb = await this.tokenService.findToken(refreshToken);
     if (!userData || !tokenFromDb) {
-      throw new Error('Unauthorized');
+      throw new UnauthorizedException();
     }
 
     await this.tokenService.removeToken(refreshToken);
@@ -75,7 +81,11 @@ export class AuthService {
     return new UserTokenDto(user, tokens);
   }
 
-  getTokenFromHeaders(cookie: string): string {
+  getTokenFromHeaders(cookie: string | undefined): string {
+    if (cookie === undefined) {
+      throw new UnauthorizedException();
+    }
+
     let token = '';
     const cookies = cookie.split(';');
 

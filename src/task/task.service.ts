@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  ConflictException,
+  NotFoundException
+} from '@nestjs/common';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { Task } from './schemas/task.schema';
@@ -23,7 +27,7 @@ export class TaskService {
   ): Promise<TaskDto> {
     const candidate = await this.findByTitle(title);
     if (candidate) {
-      throw new Error('Task with such title already exists');
+      throw new ConflictException('Task with such title already exists');
     }
 
     const task = new this.model({
@@ -56,7 +60,7 @@ export class TaskService {
   ): Promise<TaskDto> {
     const task = await this.model.findById(id);
     if (!task) {
-      throw new Error(`Task created by user with ${id} ID does not exists`);
+      throw new NotFoundException(`Task such ID does not exists`);
     }
 
     if (title !== undefined) {
@@ -70,7 +74,7 @@ export class TaskService {
     if (status !== undefined) {
       const newTaskStatus = Object.values(Status).find(s => s === status.toUpperCase());
       if (newTaskStatus === undefined) {
-        throw new Error(`Status with title ${status} does not exists`);
+        throw new NotFoundException(`Status with title ${status} does not exists`);
       }
 
       task.status = newTaskStatus;
@@ -93,7 +97,7 @@ export class TaskService {
   async findById(id: string): Promise<TaskDto> {
     const task = await this.model.findById(id).exec();
     if (!task) {
-      return null;
+      throw new NotFoundException("Task with such ID does not exists");
     }
 
     return new TaskDto(task);
