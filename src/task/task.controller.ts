@@ -7,10 +7,12 @@ import {
   Param,
   Body,
   Req,
+  UseGuards,
   UseFilters,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
+import {AuthGuard} from "../auth/auth.guard";
 import { TaskService } from './task.service';
 import { CreateTaskDto } from './dto/create.dto';
 import { UpdateTaskDto } from './dto/update.dto';
@@ -28,6 +30,7 @@ interface UserRequest extends Request {
 }
 
 @ApiTags('tasks')
+@UseGuards(AuthGuard)
 @UseFilters(AllExceptionsFilter)
 @Controller('tasks')
 export class TaskController {
