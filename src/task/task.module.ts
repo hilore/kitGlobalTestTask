@@ -1,5 +1,6 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef} from '@nestjs/common';
 import {AuthModule} from "../auth/auth.module";
+import {ProjectModule} from "../project/project.module";
 import { TokenModule } from "../token/token.module"
 import { TaskService } from './task.service';
 import { MongooseModule } from '@nestjs/mongoose';
@@ -12,7 +13,8 @@ import { TaskController } from './task.controller';
       { name: Task.name, schema: TaskSchema },
     ]),
     AuthModule,
-    TokenModule
+    TokenModule,
+    forwardRef(() => ProjectModule)
   ],
   providers: [TaskService],
   controllers: [TaskController],
