@@ -1,4 +1,4 @@
-import { IsString, Length, IsOptional } from 'class-validator';
+import { IsString, Length, IsOptional, IsEnum } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class UpdateTaskDto {
@@ -25,7 +25,7 @@ export class UpdateTaskDto {
     description: 'Task status (optional)',
   })
   @IsOptional()
-  @IsString()
+  @IsEnum(['OPEN', 'IN_PROGRESS', 'DONE'])
   @Length(4, 11)
   status?: string;
 }
