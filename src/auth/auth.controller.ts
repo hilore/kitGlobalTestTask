@@ -11,6 +11,7 @@ import {
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
+import {ConfigService} from "@nestjs/config";
 import { AuthService } from './auth.service';
 import {AuthGuard} from "./auth.guard";
 import { CreateUserDto } from './dto/createUser.dto';
@@ -30,8 +31,12 @@ import {
 export class AuthController {
   private maxAgeValue: number;
 
-  constructor(private readonly authService: AuthService) {
-    this.maxAgeValue = parseInt(process.env.JWT_TTL, 10) * 24 * 60 * 60 * 1000;
+  constructor(
+    private readonly authService: AuthService,
+    private readonly configService: ConfigService
+  ) {
+    const tokenTtl = this.configService.get<number>("jwt.ttl");
+    this.maxAgeValue = tokenTtl * 24 * 60 * 60 * 1000;
   }
 
   @UsePipes(new ValidationPipe())
