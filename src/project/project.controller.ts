@@ -6,10 +6,12 @@ import {
   Req,
   Param,
   Body,
+  UseGuards,
   UseFilters,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
+import {AuthGuard} from "../auth/auth.guard";
 import { ProjectService } from './project.service';
 import { Request } from 'express';
 import { CreateProjectDto } from './dto/createProject.dto';
@@ -27,6 +29,7 @@ interface UserRequest extends Request {
 }
 
 @ApiTags('projects')
+@UseGuards(AuthGuard)
 @UseFilters(AllExceptionsFilter)
 @Controller('projects')
 export class ProjectController {

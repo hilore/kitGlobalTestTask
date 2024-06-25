@@ -6,11 +6,13 @@ import {
   Req,
   Res,
   HttpCode,
+  UseGuards,
   UseFilters,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
+import {AuthGuard} from "./auth.guard";
 import { CreateUserDto } from './dto/createUser.dto';
 import { LoginUserDto } from './dto/loginUser.dto';
 import { Request, Response } from 'express';
@@ -76,6 +78,7 @@ export class AuthController {
 
   @ApiBearerAuth()
   @Post('sign-out')
+  @UseGuards(AuthGuard)
   @HttpCode(200)
   @ApiOperation({ summary: 'User logout' })
   @ApiResponse({
