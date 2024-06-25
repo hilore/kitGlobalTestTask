@@ -1,12 +1,16 @@
 import {
+  forwardRef,
+  Inject,
   Injectable,
   ConflictException,
   NotFoundException
 } from '@nestjs/common';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
-import { Task } from './schemas/task.schema';
+import { Task, TaskDocument } from './schemas/task.schema';
 import TaskDto from './dto/get.dto';
+import {ProjectService} from "../project/project.service";
+import {FilterTaskDto} from "./dto/filterTask.dto";
 
 enum Status {
   Open = "OPEN",
@@ -18,6 +22,8 @@ enum Status {
 export class TaskService {
   constructor(
     @InjectModel(Task.name) private model: Model<Task>,
+    @Inject(forwardRef(() => ProjectService))
+    private readonly projectService: ProjectService
   ) {}
 
   async createTask(
@@ -41,9 +47,29 @@ export class TaskService {
     return new TaskDto(task);
   }
 
-  async getAllTasks(): Promise<TaskDto[]> {
+  async getTasks(filterTaskDto: FilterTaskDto): Promise<TaskDto[]> {
+    let query;
+    let taskIds: string[] = [];
     const tasksDto: TaskDto[] = [];
-    const tasks = await this.model.find().exec();
+    let status = filterTaskDto.status;
+    const {project, sortBy, sortOrder} = filterTaskDto;
+
+    if (status) {
+      status = status.toUpperCase();
+    }
+
+    if (project) {
+      taskIds = await this.projectService.findTasksByProjectName(project);
+      query = this.model.find({_id: {$in: taskIds}, ...(status && { status })});
+    } else {
+      query = this.model.find({...(status && { status })});
+    }
+
+    if (sortBy) {
+      query.sort({[sortBy]: sortOrder === "ASC" ? 1 : -1});
+    }
+
+    const tasks: TaskDocument[] = await query.exec();
 
     tasks.forEach((task) => {
       tasksDto.push(new TaskDto(task));

@@ -4,6 +4,7 @@ import {
   Post,
   Put,
   Delete,
+  Query,
   Param,
   Body,
   Req,
@@ -16,10 +17,12 @@ import {AuthGuard} from "../auth/auth.guard";
 import { TaskService } from './task.service';
 import { CreateTaskDto } from './dto/create.dto';
 import { UpdateTaskDto } from './dto/update.dto';
+import { FilterTaskDto } from './dto/filterTask.dto';
 import { Request } from 'express';
 import {AllExceptionsFilter} from "../exceptions/AllExceptionsFilter";
 import {
   ApiTags,
+  ApiQuery,
   ApiOperation,
   ApiResponse,
   ApiBearerAuth,
@@ -39,13 +42,41 @@ export class TaskController {
   @ApiBearerAuth()
   @Get()
   @ApiOperation({ summary: 'Get all tasks' })
+  @ApiQuery({
+    name: "status",
+    required: false,
+    description: "Task status",
+    enum: ["open", "in progress", "resolved"],
+    type: String
+  })
+  @ApiQuery({
+    name: "project",
+    required: false,
+    description: "Project name",
+    type: String
+  })
+  @ApiQuery({
+    name: "sortBy",
+    required: false,
+    description: "Sort by a specific field",
+    enum: ["title", "description", "resolved", "status", "createdAt"],
+    type: String
+  })
+  @ApiQuery({
+    name: "sortOrder",
+    required: false,
+    description: "Sort order",
+    enum: ["ASC", "DESC"],
+    type: String
+  })
   @ApiResponse({
     status: 200,
     description: 'The tasks have been successfully retrieved',
   })
+  @ApiResponse({ status: 404, description: 'Project with given name does not exists' })
   @ApiResponse({ status: 500, description: 'Internal Server Error' })
-  async getTasks() {
-    const tasks = await this.taskService.getAllTasks();
+  async getTasks(@Query() dto: FilterTaskDto) {
+    const tasks = await this.taskService.getTasks(dto);
     return tasks;
   }
 
@@ -111,7 +142,7 @@ export class TaskController {
       description,
       status,
     );
-    
+
     return task;
   }
 
