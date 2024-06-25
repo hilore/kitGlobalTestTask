@@ -38,6 +38,15 @@ export class ProjectService {
     return projectsDto;
   }
 
+  async findTasksByProjectName(name: string): Promise<string[]> {
+    const project = await this.projectModel.findOne({name});
+    if (!project) {
+      throw new NotFoundException("Project with such name does not exists");
+    }
+
+    return project ? project.tasks.map(taskId => taskId.toString()) : [];
+  }
+
   async addTask(id: string, taskId: string): Promise<ProjectDto> {
     const project = await this.projectModel.findById(id);
     if (!project) {
